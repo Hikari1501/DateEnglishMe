@@ -1,0 +1,6 @@
+{
+  "name": "Date This Super-Good-At-English Me!",
+  "description": "Anime dating simulator for English practice with adaptive difficulty, voice recognition, speech synthesis, and grammar report cards. (Hẹn Hò Với Người Siêu Giỏi Tiếng Anh Như Tớ Đi!)",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

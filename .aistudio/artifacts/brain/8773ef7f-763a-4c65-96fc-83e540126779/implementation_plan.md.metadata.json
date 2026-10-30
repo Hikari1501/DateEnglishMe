@@ -1,0 +1,6 @@
+{
+  "summary":  "Updated implementation plan for Kokoro Dialogue: transitioning to a simpler hand-drawn indie webcomic art style, removing character AI TTS voices, adding cozy lo-fi acoustic & Rhodes BGM, revamping distractors (grammatical error vs. pragmatic mismatch of equal length), removing IPA and in-game translations, and allowing players to choose specific target English skills (e.g., Past Simple vs. Present Perfect, Food & Taste, Pragmatic Inferences).",
+  "updatedAt":  "2026-10-30T14:00:39.955644548Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}
