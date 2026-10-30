@@ -1,31 +1,35 @@
 import { LocationInfo, TargetSkillInfo, TargetSkillId } from '../types/game';
+import cafeBg from '../assets/images/sketch_bg_cafe_1793368998596.jpg';
+import aquariumBg from '../assets/images/sketch_bg_aquarium_1793369000206.jpg';
+import themeParkBg from '../assets/images/sketch_bg_theme_park_1793369003637.jpg';
+import rooftopBg from '../assets/images/sketch_bg_rooftop_1793369000454.jpg';
 
 export const LOCATIONS: Record<string, LocationInfo> = {
   cafe: {
     id: 'cafe',
     title: 'Sunny Corner Cafe',
-    bgImage: '/src/assets/images/sketch_bg_cafe_1793368998596.jpg',
+    bgImage: cafeBg,
     description: 'A cozy neighborhood cafe with wooden tables and warm afternoon sunlight.',
     musicTrackId: 'cafe'
   },
   aquarium: {
     id: 'aquarium',
     title: 'Blue Horizon Aquarium',
-    bgImage: '/src/assets/images/sketch_bg_aquarium_1793369000206.jpg',
+    bgImage: aquariumBg,
     description: 'A quiet underwater tunnel where gentle blue light ripples across the floor.',
     musicTrackId: 'aquarium'
   },
   theme_park: {
     id: 'theme_park',
     title: 'Sunset Carnival',
-    bgImage: '/src/assets/images/sketch_bg_theme_park_1793369003637.jpg',
+    bgImage: themeParkBg,
     description: 'A lively dusk fairground with festive lights and a glowing Ferris wheel.',
     musicTrackId: 'theme_park'
   },
   rooftop: {
     id: 'rooftop',
     title: 'Skyline Terrace',
-    bgImage: '/src/assets/images/sketch_bg_rooftop_1793369000454.jpg',
+    bgImage: rooftopBg,
     description: 'An open-air dinner terrace with quiet candlelit tables overlooking the evening city.',
     musicTrackId: 'rooftop'
   }
