@@ -105,7 +105,6 @@ export const DatingView: React.FC<DatingViewProps> = ({
 
       if (elapsed >= duration) {
         clearInterval(progressTimer);
-        // Automatically advance to partner dialogue
         startPartnerDialogue();
       }
     }, 40);
@@ -275,196 +274,149 @@ export const DatingView: React.FC<DatingViewProps> = ({
   const exprTag = getExpressionTag(activeExpression);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-[#FAF7F2] select-none">
-      {/* 1. Full-Bleed Atmospheric Location Background */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={location.bgImage}
-          alt={location.title}
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover filter contrast-[1.02] brightness-95"
-        />
-        {/* Soft visual novel vignette gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30 pointer-events-none" />
-      </div>
+    <div className="relative w-full flex-1 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-[#1a1716] overflow-hidden select-none">
+      {/* Ambient Blurred Background for Cinema Framing */}
+      <div
+        className="absolute inset-0 bg-cover bg-center filter blur-3xl opacity-25 scale-110 pointer-events-none"
+        style={{ backgroundImage: `url(${location.bgImage})` }}
+      />
 
-      {/* 2. Top HUD: Scene & Affection Meter */}
-      <div className="relative z-20 max-w-4xl w-full mx-auto px-4 pt-3 sm:pt-4">
-        <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-2xl px-4 py-2.5 border border-[#E8DFD5] shadow-md flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-xs">
+      {/* 16:9 Visual Novel Frame */}
+      <div className="relative w-full aspect-[16/9] max-h-[calc(100vh-5rem)] max-w-[calc((100vh-5rem)*16/9)] rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-white/15 bg-black flex flex-col justify-between">
+        {/* Full-Bleed Location Background in 16:9 */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={location.bgImage}
+            alt={location.title}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover filter contrast-[1.02] brightness-95"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
+        </div>
+
+        {/* 1. Top HUD Bar (Pinned inside 16:9 frame) */}
+        <div className="relative z-30 w-full px-3 sm:px-6 pt-2.5 sm:pt-3 flex items-center justify-between gap-3">
+          {/* Turn Counter & Location */}
+          <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-xl px-3 py-1 sm:py-1.5 border border-[#E8DFD5] shadow-md flex items-center gap-2">
+            <span className="w-5 h-5 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-[11px] sm:text-xs">
               {currentTurnIdx + 1}/{scenarioNodes.length}
             </span>
-            <div className="text-xs font-semibold text-slate-800">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-800">
               {location.title}
-            </div>
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-1 text-xs font-semibold text-rose-600">
+          {/* Affection Meter */}
+          <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-xl px-3 py-1 sm:py-1.5 border border-[#E8DFD5] shadow-md flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-rose-600">
               <Heart
-                className={`w-4 h-4 fill-rose-500 text-rose-500 ${
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 fill-rose-500 text-rose-500 ${
                   satisfaction >= 75 ? 'animate-pulse' : ''
                 }`}
               />
               <span className="hidden sm:inline">Affection:</span>
             </div>
-            <div className="w-24 sm:w-36 h-2.5 bg-rose-100 rounded-full overflow-hidden p-0.5 border border-rose-200">
+            <div className="w-20 sm:w-28 h-2 bg-rose-100 rounded-full overflow-hidden p-0.5 border border-rose-200">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-rose-400 to-rose-600 transition-all duration-400 ease-out"
                 style={{ width: `${satisfaction}%` }}
               />
             </div>
-            <span className="font-mono font-bold text-xs text-rose-800 w-7 text-right tabular-nums">
+            <span className="font-mono font-bold text-[11px] sm:text-xs text-rose-800 w-6 text-right tabular-nums">
               {satisfaction}%
             </span>
           </div>
         </div>
-      </div>
 
-      {/* 3. Center-Top Animated Scene Description Banner (Plays BEFORE Dialogue) */}
-      {turnPhase === 'scene_narration' && (
-        <div className="relative z-30 max-w-2xl w-full mx-auto px-4 my-auto animate-in fade-in zoom-in-95 duration-300">
-          <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-2xl p-5 shadow-2xl border-2 border-rose-300/40 text-center space-y-3 relative overflow-hidden">
-            <div className="flex items-center justify-center gap-2 text-rose-300 font-bold text-xs uppercase tracking-wider">
-              <BookOpen className="w-4 h-4 text-rose-300 animate-pulse" />
-              <span>Scene Atmosphere</span>
-            </div>
+        {/* 2. Visual Novel Stage: Character Sprite in 16:9 Ratio */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-end w-full h-full pointer-events-none overflow-hidden">
+          <div className="relative flex flex-col items-center justify-end w-full h-[72%] sm:h-[76%] md:h-[80%] max-h-full">
+            {/* Soft ambient glow behind character */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.65)_0%,transparent_65%)] pointer-events-none" />
 
-            <p className="text-base sm:text-lg font-medium leading-relaxed text-amber-50 italic px-2">
-              “{currentNode.narrativeLeadIn}”
-            </p>
-
-            {/* Reading Timer Progress Bar */}
-            <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden">
+            {/* Reactive Emotion Badge */}
+            {turnPhase === 'character_reacting' && (
               <div
-                className="h-full bg-gradient-to-r from-rose-400 to-amber-300 transition-all duration-75 ease-linear"
-                style={{ width: `${narrationProgress}%` }}
-              />
-            </div>
-
-            <div className="pt-1 flex items-center justify-between text-xs text-white/70">
-              <span className="text-[11px]">Reading scene...</span>
-              <button
-                onClick={handleSkipNarration}
-                className="px-3 py-1 rounded-lg bg-white/15 hover:bg-rose-500 text-white font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer"
+                className={`absolute top-2 right-1/4 z-30 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg border border-white/60 flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold animate-bounce ${exprTag.badgeClass}`}
               >
-                <span>Start Dialogue</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                <span>{exprTag.icon}</span>
+                <span>{exprTag.label}</span>
+              </div>
+            )}
+
+            {/* Character Sprite: scaled perfectly inside 16:9 stage */}
+            <img
+              key={currentSpriteImage}
+              src={currentSpriteImage}
+              alt={character.name}
+              referrerPolicy="no-referrer"
+              className="relative z-20 h-full w-auto max-w-full object-contain object-bottom filter contrast-[1.04] brightness-[0.98] drop-shadow-2xl mix-blend-multiply transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_0%,black_10%,black_100%)]"
+            />
           </div>
         </div>
-      )}
 
-      {/* 4. Visual Novel Center Stage: Large Character Sprite with Background Removed */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-end w-full max-w-3xl mx-auto px-4 pointer-events-none">
-        <div className="relative flex flex-col items-center justify-end w-full h-[54vh] sm:h-[64vh] md:h-[68vh] max-h-[580px]">
-          {/* Soft ambient backlight behind sprite to enhance watercolor tones */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.7)_0%,transparent_65%)] pointer-events-none" />
-
-          {/* Reactive Emotion Badge on Sprite */}
-          {turnPhase === 'character_reacting' && (
-            <div
-              className={`absolute top-4 right-1/4 z-30 px-3 py-1 rounded-full shadow-lg border border-white/60 flex items-center gap-1.5 text-xs font-bold animate-bounce ${exprTag.badgeClass}`}
-            >
-              <span>{exprTag.icon}</span>
-              <span>{exprTag.label}</span>
-            </div>
-          )}
-
-          {/* Visual Novel Character Sprite: Large, unboxed, seamless background removal via mix-blend-multiply */}
-          <img
-            key={currentSpriteImage}
-            src={currentSpriteImage}
-            alt={character.name}
-            referrerPolicy="no-referrer"
-            className="relative z-20 h-full w-auto max-w-full object-contain object-bottom filter contrast-[1.04] brightness-[0.98] drop-shadow-2xl mix-blend-multiply transition-all duration-300 ease-out animate-in fade-in zoom-in-98 [mask-image:linear-gradient(to_top,transparent_0%,black_10%,black_100%)]"
-          />
-        </div>
-      </div>
-
-      {/* 5. Visual Novel Bottom Deck: Dialogue Box & Choices */}
-      <div className="relative z-30 max-w-3xl w-full mx-auto px-4 pb-4 sm:pb-6 space-y-3">
-        {/* Visual Novel Dialogue Card (Inspired by reference screenshot) */}
-        {turnPhase !== 'scene_narration' && (
-          <div className="relative bg-[#FAF7F2]/96 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-rose-400/80 space-y-2">
-            {/* Character Name Badge Overlapping Top Left */}
-            <div className="absolute -top-3.5 left-4 z-40 flex items-center gap-2">
-              <div className="px-4 py-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-md flex items-center gap-1.5 border border-white/50">
-                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-                <span>{character.name.toUpperCase()}</span>
+        {/* 3. Scene Narration Card (Phase 1: Displays before dialogue inside 16:9) */}
+        {turnPhase === 'scene_narration' && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-black/45 backdrop-blur-[2px] animate-in fade-in duration-200">
+            <div className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 sm:p-5 max-w-lg w-full shadow-2xl border-2 border-rose-300/40 text-center space-y-2.5">
+              <div className="flex items-center justify-center gap-1.5 text-rose-300 font-bold text-xs uppercase tracking-wider">
+                <BookOpen className="w-4 h-4 text-rose-300 animate-pulse" />
+                <span>Scene Atmosphere</span>
               </div>
-              <span className="text-[11px] font-medium text-slate-600 bg-white/80 px-2 py-0.5 rounded-full shadow-2xs border border-slate-200">
-                {turnPhase === 'character_reacting' ? 'Reacting to your words' : 'Speaking'}
-              </span>
-            </div>
 
-            {/* Turn Affection Delta Feedback */}
-            {turnPhase === 'character_reacting' && selectedOption && (
-              <div className="flex justify-end pt-1">
-                <span
-                  className={`text-xs font-bold px-3 py-0.5 rounded-full shadow-xs ${
-                    selectedOption.impact > 0
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                      : 'bg-rose-100 text-rose-800 border border-rose-300'
-                  }`}
+              <p className="text-sm sm:text-base font-medium leading-relaxed text-amber-50 italic">
+                “{currentNode.narrativeLeadIn}”
+              </p>
+
+              {/* Reading Timer Progress Bar */}
+              <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-rose-400 to-amber-300 transition-all duration-75 ease-linear"
+                  style={{ width: `${narrationProgress}%` }}
+                />
+              </div>
+
+              <div className="pt-1 flex items-center justify-between text-xs text-white/70">
+                <span className="text-[11px]">Reading scene...</span>
+                <button
+                  onClick={handleSkipNarration}
+                  className="px-3 py-1 rounded-lg bg-rose-500/90 hover:bg-rose-500 text-white font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer shadow-xs"
                 >
-                  {selectedOption.impact > 0
-                    ? `+${selectedOption.impact} Affection`
-                    : `${selectedOption.impact} Affection`}
-                </span>
+                  <span>Start Dialogue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-            )}
-
-            {/* Typewritten Dialogue Speech */}
-            <p className="text-slate-900 text-sm sm:text-base font-medium leading-relaxed min-h-[3rem] pt-2">
-              “{displayedSpeech}”
-              {isTyping && <span className="inline-block w-2 h-4 bg-rose-500 ml-1 animate-pulse" />}
-            </p>
-
-            {/* In-Character Linguistic Note when Reacting */}
-            {turnPhase === 'character_reacting' && selectedOption && !isTyping && (
-              <div className="pt-2 mt-2 border-t border-slate-200/80 flex items-start gap-2 text-xs text-indigo-950 bg-indigo-50/80 p-3 rounded-xl border border-indigo-200 animate-in fade-in duration-200">
-                <HelpCircle className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold block text-[11px] uppercase tracking-wide text-indigo-700">
-                    Linguistic Note:
-                  </span>
-                  <span className="leading-snug">{selectedOption.ruleNote}</span>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* 6. Response Deck (When awaiting player choice) */}
+        {/* 4. Options Overlay (Phase 3: Floating choices neatly placed above dialogue box in 16:9) */}
         {turnPhase === 'awaiting_choice' && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="flex items-center justify-between px-1 text-xs text-white/95">
-              <div className="flex items-center gap-1.5 drop-shadow-md font-semibold">
+          <div className="absolute inset-x-3 sm:inset-x-6 bottom-[26%] sm:bottom-[28%] z-40 max-w-2xl mx-auto space-y-1.5 sm:space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            {/* Header row: title and mic toggle */}
+            <div className="flex items-center justify-between px-1 text-xs text-white drop-shadow-md">
+              <div className="flex items-center gap-1.5 font-semibold text-[11px] sm:text-xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Choose your response to {character.name}:</span>
+                <span>How will you respond to {character.name}?</span>
               </div>
 
-              {/* Microphone speaking practice button */}
               <button
                 onClick={toggleMicrophone}
-                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all shadow-md cursor-pointer ${
                   isListeningMic
                     ? 'bg-rose-500 text-white animate-pulse ring-2 ring-rose-300'
-                    : 'bg-white/90 hover:bg-white text-slate-800'
+                    : 'bg-white/95 hover:bg-white text-slate-800'
                 }`}
-                title="Speak your response aloud via microphone"
+                title="Speak response aloud via microphone"
               >
                 {isListeningMic ? (
                   <>
-                    <Mic className="w-3.5 h-3.5" />
+                    <Mic className="w-3 h-3" />
                     <span>Listening...</span>
                   </>
                 ) : (
                   <>
-                    <MicOff className="w-3.5 h-3.5 text-slate-400" />
+                    <MicOff className="w-3 h-3 text-slate-400" />
                     <span>Practice Speaking</span>
                   </>
                 )}
@@ -472,31 +424,31 @@ export const DatingView: React.FC<DatingViewProps> = ({
             </div>
 
             {spokenTranscript && (
-              <div className="bg-slate-900/90 rounded-xl px-3.5 py-2 text-xs text-white border border-rose-300/40 flex items-center gap-2">
-                <Volume2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                <span className="italic truncate">"{spokenTranscript}"</span>
+              <div className="bg-slate-900/90 rounded-xl px-3 py-1 text-xs text-white border border-rose-300/40 flex items-center gap-2">
+                <Volume2 className="w-3 h-3 text-rose-400 shrink-0" />
+                <span className="italic truncate text-[11px]">"{spokenTranscript}"</span>
               </div>
             )}
 
-            {/* 3 Balanced Equal-Length Options in Randomized Order */}
-            <div className="grid grid-cols-1 gap-2">
+            {/* 3 Equal-Length Options in Randomized Order */}
+            <div className="space-y-1.5 sm:space-y-2">
               {shuffledOptions.map((option, idx) => (
                 <button
                   key={option.id}
                   onClick={() => handleSelectOption(option)}
-                  className="group relative w-full text-left bg-white/95 hover:bg-white backdrop-blur-md rounded-xl p-3.5 border border-[#E8DFD5] hover:border-rose-400 shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-3 cursor-pointer"
+                  className="group relative w-full text-left bg-white/95 hover:bg-white backdrop-blur-md rounded-xl px-3 py-2 sm:py-2.5 border border-[#E8DFD5] hover:border-rose-400 shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-2.5 cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-rose-500 text-slate-700 group-hover:text-white text-xs font-bold flex items-center justify-center shrink-0 transition-colors">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <span className="w-5 h-5 rounded-full bg-slate-100 group-hover:bg-rose-500 text-slate-700 group-hover:text-white text-[11px] sm:text-xs font-bold flex items-center justify-center shrink-0 transition-colors">
                       {String.fromCharCode(65 + idx)}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium text-slate-900 group-hover:text-rose-600 transition-colors leading-snug">
+                    <span className="text-xs sm:text-[13px] font-medium text-slate-900 group-hover:text-rose-600 transition-colors leading-snug truncate sm:whitespace-normal">
                       {option.text}
                     </span>
                   </div>
 
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-slate-50 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center text-slate-400 transition-colors">
-                    <ArrowRight className="w-3.5 h-3.5" />
+                  <div className="shrink-0 w-5 h-5 rounded-full bg-slate-50 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center text-slate-400 transition-colors">
+                    <ArrowRight className="w-3 h-3" />
                   </div>
                 </button>
               ))}
@@ -504,20 +456,74 @@ export const DatingView: React.FC<DatingViewProps> = ({
           </div>
         )}
 
-        {/* 7. Continue Date Button (When character has finished reacting) */}
-        {turnPhase === 'character_reacting' && (
-          <div className="pt-1 animate-in fade-in duration-200">
-            <button
-              onClick={handleContinueNextTurn}
-              className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-display font-bold text-sm shadow-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>
-                {currentTurnIdx + 1 >= scenarioNodes.length
-                  ? 'See Overall Date Rating'
-                  : 'Continue Date Conversation'}
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+        {/* 5. Visual Novel Bottom Dialogue Box (Pinned inside 16:9 Frame) */}
+        {turnPhase !== 'scene_narration' && (
+          <div className="relative z-30 w-full px-3 sm:px-6 pb-2.5 sm:pb-3.5">
+            <div className="relative bg-[#FAF7F2]/96 backdrop-blur-md rounded-2xl p-3 sm:p-4 md:p-4.5 shadow-2xl border-2 border-rose-400/80">
+              {/* Character Name Badge Overlapping Top Left */}
+              <div className="absolute -top-3.5 left-3 sm:left-4 z-40 flex items-center gap-2">
+                <div className="px-3.5 py-0.5 sm:px-4 sm:py-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-display font-bold text-[11px] sm:text-xs md:text-sm tracking-wide shadow-md flex items-center gap-1.5 border border-white/50">
+                  <Sparkles className="w-3 h-3 text-amber-200" />
+                  <span>{character.name.toUpperCase()}</span>
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-medium text-slate-600 bg-white/85 px-2 py-0.5 rounded-full shadow-2xs border border-slate-200">
+                  {turnPhase === 'character_reacting' ? 'Reacting' : 'Speaking'}
+                </span>
+              </div>
+
+              {/* Turn Affection Delta Feedback */}
+              {turnPhase === 'character_reacting' && selectedOption && (
+                <div className="flex justify-end pb-1">
+                  <span
+                    className={`text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full shadow-xs ${
+                      selectedOption.impact > 0
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-rose-100 text-rose-800 border border-rose-300'
+                    }`}
+                  >
+                    {selectedOption.impact > 0
+                      ? `+${selectedOption.impact} Affection`
+                      : `${selectedOption.impact} Affection`}
+                  </span>
+                </div>
+              )}
+
+              {/* Typewritten Dialogue Speech */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1.5">
+                <p className="text-slate-900 text-xs sm:text-sm md:text-base font-medium leading-relaxed flex-1 min-h-[2.4rem]">
+                  “{displayedSpeech}”
+                  {isTyping && <span className="inline-block w-1.5 h-3.5 bg-rose-500 ml-1 animate-pulse" />}
+                </p>
+
+                {/* Continue Date Button right inside the dialogue card during reaction */}
+                {turnPhase === 'character_reacting' && !isTyping && (
+                  <button
+                    onClick={handleContinueNextTurn}
+                    className="shrink-0 px-4 py-2 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-display font-bold text-xs sm:text-sm shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>
+                      {currentTurnIdx + 1 >= scenarioNodes.length
+                        ? 'See Date Rating'
+                        : 'Next Dialogue'}
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* In-Character Linguistic Note when Reacting */}
+              {turnPhase === 'character_reacting' && selectedOption && !isTyping && (
+                <div className="pt-1.5 mt-1.5 border-t border-slate-200/80 flex items-start gap-1.5 text-[11px] sm:text-xs text-indigo-950 bg-indigo-50/80 p-2 sm:p-2.5 rounded-xl border border-indigo-200 animate-in fade-in duration-200">
+                  <HelpCircle className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-[10px] uppercase tracking-wide text-indigo-700 mr-1">
+                      Linguistic Note:
+                    </span>
+                    <span className="leading-snug">{selectedOption.ruleNote}</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
