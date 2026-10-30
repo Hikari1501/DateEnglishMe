@@ -21,12 +21,23 @@ export type CharacterExpression =
   | 'shocked'
   | 'disappointed';
 
+export interface CharacterExpressions {
+  neutral: string;
+  happy: string;
+  puzzled: string;
+  disappointed: string;
+  blushing?: string;
+  thoughtful?: string;
+  shocked?: string;
+}
+
 export interface Character {
   id: string;
   name: string;
   gender: 'female' | 'male';
   age: number;
   avatar: string;
+  expressions: CharacterExpressions;
   personality: string;
   tagline: string;
 }

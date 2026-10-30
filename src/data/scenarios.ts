@@ -7,7 +7,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
   past_vs_perfect: [
     {
       id: 'pvp_1',
-      narrativeLeadIn: "Soft golden sunlight filters through the cafe window, illuminating the steam rising from a fresh pot of herbal tea.",
+      narrativeLeadIn: "The sun shines warmly into the cafe. The smell of fresh coffee fills the room.",
       partnerSpeech: "Hey! Sorry if you waited long. Traffic was terrible. How was your trip over?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Past Simple with finished past times ("five minutes ago") vs. Present Perfect.',
@@ -43,7 +43,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pvp_2',
-      narrativeLeadIn: "The barista sets down two steaming cups on the rustic wooden counter as a quiet acoustic melody hums in the background.",
+      narrativeLeadIn: "The waiter brings two hot cups to your table. Soft acoustic music plays.",
       partnerSpeech: "Have you ever tried the seasonal spiced mocha here? People say it's amazing.",
       initialExpression: 'thoughtful',
       pedagogicalFocus: 'Present Perfect for life experience ("haven\'t tried... yet") vs. Past Simple.',
@@ -79,7 +79,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pvp_3',
-      narrativeLeadIn: "Outside, pink cherry blossom petals swirl across the pavement as a gentle breeze rustles the cafe awning.",
+      narrativeLeadIn: "A cool breeze blows outside the window. Cherry blossom petals float past.",
       partnerSpeech: "I stayed up late watching an old comedy last night. Did you do anything fun yesterday?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Past Simple with definite time "yesterday" vs. Present Perfect.',
@@ -115,7 +115,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pvp_4',
-      narrativeLeadIn: "Your partner glances at a framed black-and-white travel photograph hanging on the brick wall beside your table.",
+      narrativeLeadIn: "Your date looks up at a travel photo on the wall with bright, curious eyes.",
       partnerSpeech: "Look at that photo of Hokkaido! I've always wanted to see that snow festival. Have you been there before?",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Past Simple with finished dates vs. Present Perfect for life experience.',
@@ -151,7 +151,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pvp_5',
-      narrativeLeadIn: "The cafe clock softly chimes five as the afternoon light deepens into a warm amber dusk.",
+      narrativeLeadIn: "The clock softly ticks. Your date smiles warmly as the afternoon draws to a close.",
       partnerSpeech: "Today honestly flew by so fast. To be honest, I haven't felt this relaxed in a while.",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Present Perfect with duration phrases ("in a while / in ages") vs. Preposition traps.',
@@ -193,7 +193,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
   food_and_health: [
     {
       id: 'fah_1',
-      narrativeLeadIn: "Candlelight flickers on the rooftop table as the evening breeze carries the rich aroma of wood-fired specialties.",
+      narrativeLeadIn: "Candlelight flickers on the rooftop table. The smell of delicious food fills the evening air.",
       partnerSpeech: "Everything on this dinner menu smells incredible. Are you more into sweet treats or savory dishes?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Food flavor collocations: "savory" vs "sweet" and sense-verb adjective rules.',
@@ -229,7 +229,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'fah_2',
-      narrativeLeadIn: "The waiter sets down a golden roast chicken platter accompanied by rosemary potatoes and garlic dips.",
+      narrativeLeadIn: "The waiter brings out a warm roast chicken platter with fresh herbs.",
       partnerSpeech: "Look at the golden crust on this chicken! How does it taste to you?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Describing texture and flavor: "crispy", "tender", vs. "greasy", "bland".',
@@ -265,7 +265,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'fah_3',
-      narrativeLeadIn: "A distant city skyline glitters with thousands of lights as your partner takes a slow sip of sparkling water.",
+      narrativeLeadIn: "The city lights glow in the distance. Your date takes a slow sip of water.",
       partnerSpeech: "I’ve been trying to stay energized lately by drinking lots of water and walking. Do you follow any wellness habits?",
       initialExpression: 'thoughtful',
       pedagogicalFocus: 'Health & wellness collocations: "keep a balanced diet", "stay in shape".',
@@ -301,7 +301,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'fah_4',
-      narrativeLeadIn: "The waiter brings out a small bowl of fiery chili oil alongside warm dinner rolls.",
+      narrativeLeadIn: "The waiter sets down a small bowl of spicy red chili oil.",
       partnerSpeech: "They have a house-made hot oil here. Can you handle spicy food, or should we ask for mild?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Describing heat tolerance: "a bit of a kick", "handle spice well".',
@@ -337,7 +337,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'fah_5',
-      narrativeLeadIn: "The plates are cleared away, leaving only empty glasses and the warm glow of the tabletop lantern.",
+      narrativeLeadIn: "The dinner plates are cleared away. The table is cozy and quiet.",
       partnerSpeech: "Phew, that was hearty! I'm honestly so full I couldn't eat another bite. How are you feeling?",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Describing fullness: "stuffed", "pleasantly full", vs bodily complaints.',
@@ -379,7 +379,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
   pragmatic_inference: [
     {
       id: 'pi_1',
-      narrativeLeadIn: "A translucent blue glow washes over the tunnel floor as spotted eagle rays glide silently through the deep water above.",
+      narrativeLeadIn: "Soft blue light fills the aquarium tunnel as big stingrays glide above you.",
       partnerSpeech: "Brr, it feels a little chilly right under this air vent, doesn't it?",
       initialExpression: 'thoughtful',
       pedagogicalFocus: 'Decoding indirect requests: understanding that a temperature comment is a hint to move.',
@@ -415,7 +415,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pi_2',
-      narrativeLeadIn: "You stop beside a viewing bench to grab a sweet bean snack from your tote bag.",
+      narrativeLeadIn: "You stop at a wooden bench and take a fresh snack from your bag.",
       partnerSpeech: "Ooh, that bakery snack you bought earlier smells so sweet and warm!",
       initialExpression: 'happy',
       pedagogicalFocus: 'Decoding indirect hints: praising food is an implicit signal of wanting a taste.',
@@ -451,7 +451,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pi_3',
-      narrativeLeadIn: "Luminescent jellyfish drift like floating paper lanterns in a darkened glass chamber.",
+      narrativeLeadIn: "Glowing jellyfish float gently in a dark glass tank.",
       partnerSpeech: "I just noticed the express train back to my neighborhood stops running around ten.",
       initialExpression: 'thoughtful',
       pedagogicalFocus: 'Decoding departure hints: mentioning transit deadlines signals time awareness.',
@@ -487,7 +487,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pi_4',
-      narrativeLeadIn: "You pass a poster for a special 3D IMAX ocean documentary showing at the aquarium theater.",
+      narrativeLeadIn: "You both walk past a big poster for an ocean movie.",
       partnerSpeech: "Hmm, that special documentary is nearly three hours long. That's quite a commitment, huh?",
       initialExpression: 'puzzled',
       pedagogicalFocus: 'Decoding reluctance: pointing out a drawback usually implies hesitation.',
@@ -523,7 +523,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pi_5',
-      narrativeLeadIn: "You emerge from the aquarium tunnel into the quiet dusk courtyard surrounded by reflecting pools.",
+      narrativeLeadIn: "You step outside the aquarium into the cool evening air.",
       partnerSpeech: "My upcoming weekend is pretty hectic, but I might have an hour free on Sunday afternoon.",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Decoding selective availability: offering a small window is an invitation for a low-pressure date.',
@@ -565,7 +565,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
   polite_requests: [
     {
       id: 'pr_1',
-      narrativeLeadIn: "Fairy lights sparkle in the dusk canopy as the gentle hum of carnival music and spinning rides fills the air.",
+      narrativeLeadIn: "Bright carnival lights glow in the dusk. You can hear cheerful music all around.",
       partnerSpeech: "The fairground looks so lively right now! What do you feel like checking out first?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Making collaborative proposals: "Why don\'t we...", "How about we...".',
@@ -601,7 +601,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pr_2',
-      narrativeLeadIn: "A cool evening breeze sweeps across the wooden bridge leading to the carousel pavilion.",
+      narrativeLeadIn: "A cool evening breeze blows across the boardwalk bridge.",
       partnerSpeech: "This boardwalk bench is right in the path of the lake breeze. Is it bothering you at all?",
       initialExpression: 'thoughtful',
       pedagogicalFocus: 'Polite adjustment requests: "Would you mind if we...", "Could we possibly...".',
@@ -637,7 +637,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pr_3',
-      narrativeLeadIn: "The illuminated Ferris wheel casts glowing golden reflections across your partner's smiling face.",
+      narrativeLeadIn: "The big Ferris wheel glows bright gold behind your smiling date.",
       partnerSpeech: "The lights behind the Ferris wheel look so magical right now. Could you take a picture of me?",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Polite offers of help: "I\'d be glad to", "Let me get that for you".',
@@ -673,7 +673,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pr_4',
-      narrativeLeadIn: "The mouth-watering aroma of powdered sugar and warm cinnamon drifts from a carnival dessert cart.",
+      narrativeLeadIn: "A sweet smell of warm cinnamon and sugar comes from a dessert cart.",
       partnerSpeech: "Both of these look incredible—the strawberry funnel cake and the caramel apple. Which should we get?",
       initialExpression: 'happy',
       pedagogicalFocus: 'Shared suggestions: "Shall we get both and split them?", "How about we...".',
@@ -709,7 +709,7 @@ export const SCENARIOS_BY_SKILL: Record<TargetSkillId, DialogueNode[]> = {
     },
     {
       id: 'pr_5',
-      narrativeLeadIn: "The carnival lights slowly dim as the crowd thins out into the cool night air.",
+      narrativeLeadIn: "The carnival lights slowly dim as the night comes to an end.",
       partnerSpeech: "The night went by so quickly. I really loved walking around the carnival with you.",
       initialExpression: 'blushing',
       pedagogicalFocus: 'Suggesting future dates: "Would you like to...", "Could I walk you to...".',

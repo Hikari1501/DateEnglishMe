@@ -15,10 +15,12 @@ import {
   ArrowRight,
   BookOpen,
   HelpCircle,
-  Sparkles
+  Sparkles,
+  Volume2
 } from 'lucide-react';
 import { musicEngine } from '../utils/music';
 import { shuffleOptions } from '../data/scenarios';
+import { getCharacterSprite } from '../data/characters';
 import {
   VoiceRecognitionSession,
   isSpeechRecognitionSupported,
@@ -33,6 +35,8 @@ interface DatingViewProps {
   onFinishDate: (finalHistory: TurnHistoryItem[], finalSatisfaction: number) => void;
 }
 
+type TurnPhase = 'scene_narration' | 'partner_speaking' | 'awaiting_choice' | 'character_reacting';
+
 export const DatingView: React.FC<DatingViewProps> = ({
   character,
   location,
@@ -43,17 +47,20 @@ export const DatingView: React.FC<DatingViewProps> = ({
   const [satisfaction, setSatisfaction] = useState(50);
   const [history, setHistory] = useState<TurnHistoryItem[]>([]);
 
+  // Turn Progression Phase
+  const [turnPhase, setTurnPhase] = useState<TurnPhase>('scene_narration');
+  const [activeExpression, setActiveExpression] = useState<CharacterExpression>('happy');
+  const [selectedOption, setSelectedOption] = useState<DialogueOption | null>(null);
+
   // Randomized options for current turn
   const [shuffledOptions, setShuffledOptions] = useState<DialogueOption[]>([]);
 
   // Typewriter effect state
   const [displayedSpeech, setDisplayedSpeech] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
 
-  // Turn Progression State: 'awaiting_choice' | 'character_reacting'
-  const [turnState, setTurnState] = useState<'awaiting_choice' | 'character_reacting'>('awaiting_choice');
-  const [activeExpression, setActiveExpression] = useState<CharacterExpression>('happy');
-  const [selectedOption, setSelectedOption] = useState<DialogueOption | null>(null);
+  // Scene narration timer progress (0 to 100%)
+  const [narrationProgress, setNarrationProgress] = useState(0);
 
   // Optional Voice Input
   const [isListeningMic, setIsListeningMic] = useState(false);
@@ -74,36 +81,66 @@ export const DatingView: React.FC<DatingViewProps> = ({
     };
   }, [location.musicTrackId]);
 
-  // Reset turn state and start typewriter for partner's question
+  // Turn Lifecycle: Step 1: Play Scene Narration with dedicated reading time BEFORE partner speaks
   useEffect(() => {
-    setTurnState('awaiting_choice');
+    setTurnPhase('scene_narration');
     setSelectedOption(null);
     setActiveExpression(currentNode.initialExpression);
-    setIsTyping(true);
     setDisplayedSpeech('');
     setSpokenTranscript('');
+    setNarrationProgress(0);
 
     if (currentNode && currentNode.options) {
       setShuffledOptions(shuffleOptions(currentNode.options));
     }
 
+    // Narration progress timer (2.6 seconds total)
+    const startTime = Date.now();
+    const duration = 2600;
+
+    const progressTimer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+      setNarrationProgress(pct);
+
+      if (elapsed >= duration) {
+        clearInterval(progressTimer);
+        // Automatically advance to partner dialogue
+        startPartnerDialogue();
+      }
+    }, 40);
+
+    return () => clearInterval(progressTimer);
+  }, [currentTurnIdx, currentNode]);
+
+  // Step 2: Partner speaks with typewriter effect
+  const startPartnerDialogue = () => {
+    setTurnPhase('partner_speaking');
+    setIsTyping(true);
+    setDisplayedSpeech('');
+
     const fullText = currentNode.partnerSpeech;
     let charIndex = 0;
 
-    const timer = setInterval(() => {
+    const speechTimer = setInterval(() => {
       if (charIndex <= fullText.length) {
         setDisplayedSpeech(fullText.slice(0, charIndex));
         charIndex++;
       } else {
-        clearInterval(timer);
+        clearInterval(speechTimer);
         setIsTyping(false);
+        setTurnPhase('awaiting_choice');
       }
     }, 18);
+  };
 
-    return () => clearInterval(timer);
-  }, [currentTurnIdx, currentNode]);
+  // Skip narration directly to dialogue if user clicks
+  const handleSkipNarration = () => {
+    musicEngine.playClick();
+    startPartnerDialogue();
+  };
 
-  // Handle Option Selection
+  // Step 3: Handle Option Selection
   const handleSelectOption = (option: DialogueOption) => {
     if (isListeningMic) {
       voiceSessionRef.current?.stopListening();
@@ -119,10 +156,10 @@ export const DatingView: React.FC<DatingViewProps> = ({
 
     const newSatisfaction = Math.min(100, Math.max(0, satisfaction + option.impact));
 
-    // Update character's reactive expression dynamically!
+    // Dynamic reactive expression change!
     setActiveExpression(option.reactionExpression);
     setSelectedOption(option);
-    setTurnState('character_reacting');
+    setTurnPhase('character_reacting');
 
     // Deliver in-character dialogue feedback with typewriter
     setIsTyping(true);
@@ -212,30 +249,34 @@ export const DatingView: React.FC<DatingViewProps> = ({
     });
   };
 
-  const getExpressionVisuals = (expression: CharacterExpression) => {
+  // Resolve current active sprite image based on character and expression
+  const currentSpriteImage = getCharacterSprite(character, activeExpression);
+
+  // Expression visual animation tag
+  const getExpressionTag = (expression: CharacterExpression) => {
     switch (expression) {
-      case 'blushing':
-        return { label: 'Flustered & Happy', icon: '💗', ring: 'ring-3 ring-rose-300' };
       case 'happy':
-        return { label: 'Delighted', icon: '✨', ring: 'ring-3 ring-amber-200' };
+        return { label: 'Delighted', icon: '✨', badgeClass: 'bg-emerald-500 text-white' };
+      case 'blushing':
+        return { label: 'Flustered & Happy', icon: '💗', badgeClass: 'bg-rose-500 text-white' };
       case 'puzzled':
-        return { label: 'Puzzled & Correcting', icon: '❓', ring: 'ring-3 ring-amber-300' };
+        return { label: 'Puzzled & Correcting', icon: '❓', badgeClass: 'bg-amber-500 text-white' };
       case 'thoughtful':
-        return { label: 'Thoughtful', icon: '💭', ring: 'ring-3 ring-indigo-200' };
+        return { label: 'Thinking', icon: '💭', badgeClass: 'bg-indigo-500 text-white' };
       case 'shocked':
-        return { label: 'Surprised', icon: '❗', ring: 'ring-3 ring-red-300' };
+        return { label: 'Surprised', icon: '❗', badgeClass: 'bg-red-500 text-white' };
       case 'disappointed':
-        return { label: 'Disappointed', icon: '💔', ring: 'ring-3 ring-rose-400' };
+        return { label: 'Disappointed', icon: '💔', badgeClass: 'bg-rose-600 text-white' };
       default:
-        return { label: 'Engaged', icon: '🌸', ring: 'ring-2 ring-white/50' };
+        return { label: 'Listening', icon: '🌸', badgeClass: 'bg-slate-700 text-white' };
     }
   };
 
-  const exprVisual = getExpressionVisuals(activeExpression);
+  const exprTag = getExpressionTag(activeExpression);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-[#FAF7F2]">
-      {/* Hand-Drawn Indie Webcomic Background */}
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-[#FAF7F2] select-none">
+      {/* 1. Full-Bleed Atmospheric Location Background */}
       <div className="absolute inset-0 z-0">
         <img
           src={location.bgImage}
@@ -243,17 +284,18 @@ export const DatingView: React.FC<DatingViewProps> = ({
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover filter contrast-[1.02] brightness-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#26201c]/90 via-[#26201c]/40 to-black/30" />
+        {/* Soft visual novel vignette gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30 pointer-events-none" />
       </div>
 
-      {/* Top HUD: Affection Meter & Turn Progress */}
-      <div className="relative z-10 max-w-4xl w-full mx-auto px-4 pt-3 sm:pt-4">
-        <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-2xl px-4 py-2.5 border border-[#E8DFD5] shadow-xs flex items-center justify-between gap-3">
+      {/* 2. Top HUD: Scene & Affection Meter */}
+      <div className="relative z-20 max-w-4xl w-full mx-auto px-4 pt-3 sm:pt-4">
+        <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-2xl px-4 py-2.5 border border-[#E8DFD5] shadow-md flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-xs">
               {currentTurnIdx + 1}/{scenarioNodes.length}
             </span>
-            <div className="text-xs font-semibold text-slate-700">
+            <div className="text-xs font-semibold text-slate-800">
               {location.title}
             </div>
           </div>
@@ -267,7 +309,7 @@ export const DatingView: React.FC<DatingViewProps> = ({
               />
               <span className="hidden sm:inline">Affection:</span>
             </div>
-            <div className="w-24 sm:w-32 h-2.5 bg-rose-100 rounded-full overflow-hidden p-0.5 border border-rose-200">
+            <div className="w-24 sm:w-36 h-2.5 bg-rose-100 rounded-full overflow-hidden p-0.5 border border-rose-200">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-rose-400 to-rose-600 transition-all duration-400 ease-out"
                 style={{ width: `${satisfaction}%` }}
@@ -280,108 +322,149 @@ export const DatingView: React.FC<DatingViewProps> = ({
         </div>
       </div>
 
-      {/* Center Stage: Webcomic Character Sprite with Dynamic Reactive Expression */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-end max-w-4xl mx-auto px-4 py-1 pointer-events-none">
-        <div className="relative animate-float-slow pointer-events-auto">
-          {/* Reaction Emotion Speech Badge */}
-          <div className="absolute -top-4 -right-2 z-20 bg-white/95 backdrop-blur-xs px-3 py-1 rounded-full shadow-xs border border-[#E8DFD5] flex items-center gap-1 text-xs font-bold text-slate-800 animate-bounce">
-            <span className="text-sm">{exprVisual.icon}</span>
-            <span>{exprVisual.label}</span>
-          </div>
+      {/* 3. Center-Top Animated Scene Description Banner (Plays BEFORE Dialogue) */}
+      {turnPhase === 'scene_narration' && (
+        <div className="relative z-30 max-w-2xl w-full mx-auto px-4 my-auto animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-2xl p-5 shadow-2xl border-2 border-rose-300/40 text-center space-y-3 relative overflow-hidden">
+            <div className="flex items-center justify-center gap-2 text-rose-300 font-bold text-xs uppercase tracking-wider">
+              <BookOpen className="w-4 h-4 text-rose-300 animate-pulse" />
+              <span>Scene Atmosphere</span>
+            </div>
 
-          {/* Webcomic Sketch Character Portrait */}
-          <div
-            className={`w-48 sm:w-60 aspect-square rounded-full overflow-hidden bg-white/40 shadow-md transition-all duration-300 ${exprVisual.ring}`}
-          >
-            <img
-              src={character.avatar}
-              alt={character.name}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover object-top"
-            />
+            <p className="text-base sm:text-lg font-medium leading-relaxed text-amber-50 italic px-2">
+              “{currentNode.narrativeLeadIn}”
+            </p>
+
+            {/* Reading Timer Progress Bar */}
+            <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-rose-400 to-amber-300 transition-all duration-75 ease-linear"
+                style={{ width: `${narrationProgress}%` }}
+              />
+            </div>
+
+            <div className="pt-1 flex items-center justify-between text-xs text-white/70">
+              <span className="text-[11px]">Reading scene...</span>
+              <button
+                onClick={handleSkipNarration}
+                className="px-3 py-1 rounded-lg bg-white/15 hover:bg-rose-500 text-white font-semibold text-xs transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Start Dialogue</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+
+      {/* 4. Visual Novel Center Stage: Large Character Sprite with Background Removed */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-end w-full max-w-3xl mx-auto px-4 pointer-events-none">
+        <div className="relative flex flex-col items-center justify-end w-full h-[54vh] sm:h-[64vh] md:h-[68vh] max-h-[580px]">
+          {/* Soft ambient backlight behind sprite to enhance watercolor tones */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.7)_0%,transparent_65%)] pointer-events-none" />
+
+          {/* Reactive Emotion Badge on Sprite */}
+          {turnPhase === 'character_reacting' && (
+            <div
+              className={`absolute top-4 right-1/4 z-30 px-3 py-1 rounded-full shadow-lg border border-white/60 flex items-center gap-1.5 text-xs font-bold animate-bounce ${exprTag.badgeClass}`}
+            >
+              <span>{exprTag.icon}</span>
+              <span>{exprTag.label}</span>
+            </div>
+          )}
+
+          {/* Visual Novel Character Sprite: Large, unboxed, seamless background removal via mix-blend-multiply */}
+          <img
+            key={currentSpriteImage}
+            src={currentSpriteImage}
+            alt={character.name}
+            referrerPolicy="no-referrer"
+            className="relative z-20 h-full w-auto max-w-full object-contain object-bottom filter contrast-[1.04] brightness-[0.98] drop-shadow-2xl mix-blend-multiply transition-all duration-300 ease-out animate-in fade-in zoom-in-98 [mask-image:linear-gradient(to_top,transparent_0%,black_10%,black_100%)]"
+          />
         </div>
       </div>
 
-      {/* Bottom Deck: Narrative Stage Line & In-Character Dialogue Box */}
-      <div className="relative z-20 max-w-3xl w-full mx-auto px-4 pb-5 space-y-3">
-        {/* Narrative Atmosphere Lead-in Line */}
-        <div className="bg-black/40 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 text-white/90 text-xs sm:text-[13px] italic flex items-center gap-2">
-          <BookOpen className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-          <span className="leading-snug">{currentNode.narrativeLeadIn}</span>
-        </div>
-
-        {/* Character Dialogue Box */}
-        <div className="bg-[#FAF7F2]/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-xl border border-[#E8DFD5] space-y-2">
-          <div className="flex items-center justify-between pb-1 border-b border-slate-200/60">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-rose-500 text-white font-display font-bold text-xs">
-                {character.name}
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium">
-                {turnState === 'character_reacting' ? 'Reacting to what you said' : 'Speaking'}
+      {/* 5. Visual Novel Bottom Deck: Dialogue Box & Choices */}
+      <div className="relative z-30 max-w-3xl w-full mx-auto px-4 pb-4 sm:pb-6 space-y-3">
+        {/* Visual Novel Dialogue Card (Inspired by reference screenshot) */}
+        {turnPhase !== 'scene_narration' && (
+          <div className="relative bg-[#FAF7F2]/96 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-rose-400/80 space-y-2">
+            {/* Character Name Badge Overlapping Top Left */}
+            <div className="absolute -top-3.5 left-4 z-40 flex items-center gap-2">
+              <div className="px-4 py-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-md flex items-center gap-1.5 border border-white/50">
+                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                <span>{character.name.toUpperCase()}</span>
+              </div>
+              <span className="text-[11px] font-medium text-slate-600 bg-white/80 px-2 py-0.5 rounded-full shadow-2xs border border-slate-200">
+                {turnPhase === 'character_reacting' ? 'Reacting to your words' : 'Speaking'}
               </span>
             </div>
 
-            {turnState === 'character_reacting' && selectedOption && (
-              <span
-                className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                  selectedOption.impact > 0
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-700 border border-rose-200'
-                }`}
-              >
-                {selectedOption.impact > 0 ? `+${selectedOption.impact} Affection` : `${selectedOption.impact} Affection`}
-              </span>
+            {/* Turn Affection Delta Feedback */}
+            {turnPhase === 'character_reacting' && selectedOption && (
+              <div className="flex justify-end pt-1">
+                <span
+                  className={`text-xs font-bold px-3 py-0.5 rounded-full shadow-xs ${
+                    selectedOption.impact > 0
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-rose-100 text-rose-800 border border-rose-300'
+                  }`}
+                >
+                  {selectedOption.impact > 0
+                    ? `+${selectedOption.impact} Affection`
+                    : `${selectedOption.impact} Affection`}
+                </span>
+              </div>
+            )}
+
+            {/* Typewritten Dialogue Speech */}
+            <p className="text-slate-900 text-sm sm:text-base font-medium leading-relaxed min-h-[3rem] pt-2">
+              “{displayedSpeech}”
+              {isTyping && <span className="inline-block w-2 h-4 bg-rose-500 ml-1 animate-pulse" />}
+            </p>
+
+            {/* In-Character Linguistic Note when Reacting */}
+            {turnPhase === 'character_reacting' && selectedOption && !isTyping && (
+              <div className="pt-2 mt-2 border-t border-slate-200/80 flex items-start gap-2 text-xs text-indigo-950 bg-indigo-50/80 p-3 rounded-xl border border-indigo-200 animate-in fade-in duration-200">
+                <HelpCircle className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block text-[11px] uppercase tracking-wide text-indigo-700">
+                    Linguistic Note:
+                  </span>
+                  <span className="leading-snug">{selectedOption.ruleNote}</span>
+                </div>
+              </div>
             )}
           </div>
+        )}
 
-          {/* Dialogue Text */}
-          <p className="text-slate-800 text-sm sm:text-base font-medium leading-relaxed min-h-[2.5rem]">
-            “{displayedSpeech}”
-            {isTyping && <span className="inline-block w-1.5 h-3.5 bg-rose-500 ml-1 animate-pulse" />}
-          </p>
-
-          {/* In-character linguistic takeaway note when reacting */}
-          {turnState === 'character_reacting' && selectedOption && !isTyping && (
-            <div className="pt-2 mt-2 border-t border-slate-200/60 flex items-start gap-2 text-xs text-indigo-900 bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100">
-              <HelpCircle className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block text-[11px] uppercase tracking-wide text-indigo-700">
-                  Linguistic Note:
-                </span>
-                <span>{selectedOption.ruleNote}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Response Deck OR In-Character Continue Button */}
-        {turnState === 'awaiting_choice' ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1 text-xs text-white/90">
-              <div className="flex items-center gap-1.5 drop-shadow-sm font-medium">
+        {/* 6. Response Deck (When awaiting player choice) */}
+        {turnPhase === 'awaiting_choice' && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center justify-between px-1 text-xs text-white/95">
+              <div className="flex items-center gap-1.5 drop-shadow-md font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>How will you respond to {character.name}?</span>
+                <span>Choose your response to {character.name}:</span>
               </div>
 
+              {/* Microphone speaking practice button */}
               <button
                 onClick={toggleMicrophone}
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition-all shadow-xs ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
                   isListeningMic
                     ? 'bg-rose-500 text-white animate-pulse ring-2 ring-rose-300'
-                    : 'bg-white/90 hover:bg-white text-slate-700'
+                    : 'bg-white/90 hover:bg-white text-slate-800'
                 }`}
                 title="Speak your response aloud via microphone"
               >
                 {isListeningMic ? (
                   <>
-                    <Mic className="w-3 h-3" />
+                    <Mic className="w-3.5 h-3.5" />
                     <span>Listening...</span>
                   </>
                 ) : (
                   <>
-                    <MicOff className="w-3 h-3 text-slate-400" />
+                    <MicOff className="w-3.5 h-3.5 text-slate-400" />
                     <span>Practice Speaking</span>
                   </>
                 )}
@@ -389,25 +472,25 @@ export const DatingView: React.FC<DatingViewProps> = ({
             </div>
 
             {spokenTranscript && (
-              <div className="bg-slate-900/90 rounded-xl px-3 py-1.5 text-xs text-white border border-rose-300/30 flex items-center gap-2">
-                <Mic className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+              <div className="bg-slate-900/90 rounded-xl px-3.5 py-2 text-xs text-white border border-rose-300/40 flex items-center gap-2">
+                <Volume2 className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                 <span className="italic truncate">"{spokenTranscript}"</span>
               </div>
             )}
 
-            {/* Equal-Length Randomized Options */}
+            {/* 3 Balanced Equal-Length Options in Randomized Order */}
             <div className="grid grid-cols-1 gap-2">
               {shuffledOptions.map((option, idx) => (
                 <button
                   key={option.id}
                   onClick={() => handleSelectOption(option)}
-                  className="group relative w-full text-left bg-white/95 hover:bg-white backdrop-blur-md rounded-xl p-3.5 border border-[#E8DFD5] hover:border-rose-400 shadow-xs hover:shadow-md transition-all flex items-center justify-between gap-3"
+                  className="group relative w-full text-left bg-white/95 hover:bg-white backdrop-blur-md rounded-xl p-3.5 border border-[#E8DFD5] hover:border-rose-400 shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-3 cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5 flex-1">
-                    <span className="w-5 h-5 rounded-full bg-slate-100 group-hover:bg-rose-100 text-slate-600 group-hover:text-rose-700 text-xs font-bold flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3 flex-1">
+                    <span className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-rose-500 text-slate-700 group-hover:text-white text-xs font-bold flex items-center justify-center shrink-0 transition-colors">
                       {String.fromCharCode(65 + idx)}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium text-slate-900 group-hover:text-rose-600 transition-colors">
+                    <span className="text-xs sm:text-sm font-medium text-slate-900 group-hover:text-rose-600 transition-colors leading-snug">
                       {option.text}
                     </span>
                   </div>
@@ -419,12 +502,14 @@ export const DatingView: React.FC<DatingViewProps> = ({
               ))}
             </div>
           </div>
-        ) : (
-          /* Character Reacted -> Advance Button */
-          <div className="pt-1">
+        )}
+
+        {/* 7. Continue Date Button (When character has finished reacting) */}
+        {turnPhase === 'character_reacting' && (
+          <div className="pt-1 animate-in fade-in duration-200">
             <button
               onClick={handleContinueNextTurn}
-              className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-display font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-display font-bold text-sm shadow-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>
                 {currentTurnIdx + 1 >= scenarioNodes.length
